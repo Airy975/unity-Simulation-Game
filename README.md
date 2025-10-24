@@ -4,7 +4,7 @@
 
 ## 游戏展示
 ![](https://github.com/Airy975/unity-Simulation-Game/blob/main/image/1.png)
-![](https://github.com/Airy975/unity-Simulation-Game/blob/main/image/1.png)
+![](https://github.com/Airy975/unity-Simulation-Game/blob/main/image/2.png)
 
 ## 判断需求不同的顾客的方法
 在判断顾客需求的核心逻辑中，主要由 Customer 脚本内的 TryReceiveItem 方法完成。当玩家向顾客交付物品时，会将该物品对象作为参数传入TryReceiveItem方法中。在方法内部，脚本会先获取玩家所持物品的名称，并与顾客自身设定的wantedItem进行对比。
