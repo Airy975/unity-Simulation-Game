@@ -40,6 +40,7 @@ public bool TryReceiveItem(GameObject heldItem)
 
 ### 顾客生成与行为控制逻辑
 在整个顾客系统中，顾客的刷新、移动、停留与离开是相互配合完成的。其中，CreateCustomer脚本负责定时生成顾客，而Customer脚本负责单个顾客的行为控制。
+
 #### 顾客的生成逻辑
 顾客的刷新由CreateCustomer脚本控制，其核心思想是每隔一定时间检测空位 → 随机生成顾客 → 分配目标点与参数。
 首先遍历spawnedCustomers数组，找到哪些顾客位置为空。
@@ -69,3 +70,34 @@ public void FreeSpot(int index)
     }
 }
 ```
+#### 顾客的移动与停留逻辑
+顾客生成后，Customer脚本中的Update()方法会控制其行为
+```csharp
+void Update()
+{
+    if (!reachedSpot && targetSpot != null)
+    {
+        // 移动到目标点
+        transform.position = Vector3.MoveTowards(transform.position, targetSpot.position, moveSpeed * Time.deltaTime);
+
+        // 到达位置
+        if (Vector3.Distance(transform.position, targetSpot.position) < 0.05f)
+        {
+            reachedSpot = true;
+            timer = stayTime;
+        }
+    }
+    else if (reachedSpot)
+    {
+        // 停留倒计时
+        timer -= Time.deltaTime;
+        if (timer <= 0f)
+        {
+            Leave();
+        }
+    }
+}
+```
+这让顾客生成时从CreateCustomer生成位置出现，然后自动朝目标点移动，在到达目标点后，等待几秒，最后停留时间结束后调用Leave()，自动销毁自身并释放占位。
+
+通过这两个脚本的配合，系统能够实现持续、自动、随机的顾客流动效果
