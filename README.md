@@ -37,3 +37,35 @@ public bool TryReceiveItem(GameObject heldItem)
 ```
 当两者匹配时，顾客会：显示“收到正确物品”的提示并且销毁被交付的物品。<br>
 如果不匹配，则会：显示顾客不需要的反馈UI并且在3秒后自动隐藏UI。
+
+### 顾客生成与行为控制逻辑
+在整个顾客系统中，顾客的刷新、移动、停留与离开是相互配合完成的。其中，CreateCustomer脚本负责定时生成顾客，而Customer脚本负责单个顾客的行为控制。
+#### 顾客的生成逻辑
+顾客的刷新由CreateCustomer脚本控制，其核心思想是每隔一定时间检测空位 → 随机生成顾客 → 分配目标点与参数。
+首先遍历spawnedCustomers数组，找到哪些顾客位置为空。
+```csharp
+if (spawnedCustomers[i] == null)
+    freeIndices.Add(i);
+```
+然后从空位中随机选择一个位置，从顾客预制体列表中随机选择一种顾客类型，并且调用Instantiate()实例化新顾客。
+```csharp
+int randomSpotIndex = freeIndices[UnityEngine.Random.Range(0, freeIndices.Count)];
+GameObject prefab = customerPrefabs[UnityEngine.Random.Range(0, customerPrefabs.Length)];
+GameObject newCustomer = Instantiate(prefab, transform.position, Quaternion.identity);
+```
+之后为新生成的顾客绑定：spawner（生成器引用），spotIndex（当前站位编号）和targetSpot（目标位置）。
+```csharp
+customerScript.spawner = this;
+customerScript.spotIndex = randomSpotIndex;
+customerScript.targetSpot = customerSpots[randomSpotIndex];
+```
+最后当顾客离开时，会触发FreeSpot(int index)，将该位置标记为空，等待下次刷新。
+```csharp
+public void FreeSpot(int index)
+{
+    if (index >= 0 && index < spawnedCustomers.Length)
+    {
+        spawnedCustomers[index] = null;
+    }
+}
+```
